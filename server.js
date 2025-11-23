@@ -43,6 +43,24 @@ async function initializeDataFiles() {
             }
         }
 
+        // Seed a default user if no users exist
+        const users = await readData(USERS_FILE);
+        if (users.length === 0) {
+            const defaultPassword = 'password123';
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+            const defaultUser = {
+                id: Date.now().toString(),
+                name: 'Test User',
+                email: 'test@example.com',
+                password: hashedPassword,
+                createdAt: new Date().toISOString(),
+                reputation: 0
+            };
+            users.push(defaultUser);
+            await writeData(USERS_FILE, users);
+            console.log('✓ Default test user created (email: test@example.com, password: password123)');
+        }
+
         console.log('✓ Data files initialized');
     } catch (error) {
         console.error('Error initializing data files:', error);

@@ -31,39 +31,7 @@ function checkAuth() {
 }
 
 // Login Handler
-async function handleLogin(event) {
-    event.preventDefault();
-
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorEl = document.getElementById('loginError');
-
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            AppState.currentUser = data.user;
-
-            closeModal('loginModal');
-            updateNavbar();
-            showNotification('Welcome back, ' + data.user.name + '!', 'success');
-        } else {
-            errorEl.textContent = data.message || 'Login failed';
-            errorEl.classList.remove('hidden');
-        }
-    } catch (error) {
-        errorEl.textContent = 'Connection error. Please try again.';
-        errorEl.classList.remove('hidden');
-    }
-}
+// Login logic moved to pages/login.js
 
 // Register Handler
 async function handleRegister(event) {
@@ -140,7 +108,7 @@ function updateNavbar() {
     } else {
         actionsEl.innerHTML = `
             <div class="flex gap-sm">
-                <button class="btn btn-secondary btn-sm" onclick="openModal('loginModal')">Login</button>
+                <button class="btn btn-secondary btn-sm" onclick="navigateTo('login')">Login</button>
                 <button class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Register</button>
             </div>
         `;
@@ -157,10 +125,7 @@ function getInitials(name) {
         .substring(0, 2);
 }
 
-// ===================================
-// Routing
-// ===================================
-
+// Navigation
 function navigateTo(route, params = {}) {
     AppState.currentRoute = route;
 
@@ -176,10 +141,11 @@ function navigateTo(route, params = {}) {
 
     // Close mobile menu if open
     const navbarNav = document.getElementById('navbarNav');
-    navbarNav.classList.remove('active');
+    if (navbarNav) navbarNav.classList.remove('active');
 
     // Render appropriate page
     const contentEl = document.getElementById('content');
+    if (!contentEl) return;
 
     switch (route) {
         case 'home':
@@ -197,7 +163,7 @@ function navigateTo(route, params = {}) {
         case 'ask-question':
             if (!AppState.currentUser) {
                 showNotification('Please login to ask a question', 'warning');
-                openModal('loginModal');
+                navigateTo('login');
                 return;
             }
             contentEl.innerHTML = renderAskQuestionPage();
@@ -209,7 +175,7 @@ function navigateTo(route, params = {}) {
         case 'upload-code':
             if (!AppState.currentUser) {
                 showNotification('Please login to upload code', 'warning');
-                openModal('loginModal');
+                navigateTo('login');
                 return;
             }
             contentEl.innerHTML = renderUploadCodePage();
@@ -218,10 +184,16 @@ function navigateTo(route, params = {}) {
         case 'profile':
             if (!AppState.currentUser) {
                 showNotification('Please login to view profile', 'warning');
-                openModal('loginModal');
+                navigateTo('login');
                 return;
             }
             contentEl.innerHTML = renderProfilePage();
+            break;
+        case 'login':
+            if (typeof renderLoginPage === 'function') {
+                contentEl.innerHTML = renderLoginPage();
+                if (typeof attachLoginHandlers === 'function') attachLoginHandlers();
+            }
             break;
         default:
             contentEl.innerHTML = renderHomePage();
@@ -230,12 +202,6 @@ function navigateTo(route, params = {}) {
     // Scroll to top
     window.scrollTo(0, 0);
 }
-
-// Handle browser back/forward
-window.addEventListener('popstate', () => {
-    const hash = window.location.hash.substring(1) || 'home';
-    navigateTo(hash);
-});
 
 // ===================================
 // Data Loading
