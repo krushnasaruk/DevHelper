@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevConnect - Developer Community Platform</title>
+    <meta name="description"
+        content="A modern developer community where you can ask questions, get AI-powered answers, and share code with fellow developers.">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <!-- Icons -->
+    <style>
+        /* Simple icon classes using Unicode symbols */
+        .icon::before {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Navigation Bar -->
+        <nav class="navbar" id="navbar">
+            <div class="navbar-container">
+                <a href="#home" class="navbar-brand" data-route="home">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="currentColor" opacity="0.1" />
+                        <path d="M16 8L8 14v10h6v-6h4v6h6V14l-8-6z" fill="currentColor" />
+                    </svg>
+                    DevConnect
+                </a>
+
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                    ☰
+                </button>
+
+                <ul class="navbar-nav" id="navbarNav">
+                    <li><a href="#home" class="nav-link active" data-route="home" id="nav-home">🏠 Home</a></li>
+                    <li><a href="#questions" class="nav-link" data-route="questions" id="nav-questions">💬 Questions</a>
+                    </li>
+                    <li><a href="#community" class="nav-link" data-route="community" id="nav-community">👥 Community</a>
+                    </li>
+                    <li><a href="#upload-code" class="nav-link" data-route="upload-code" id="nav-upload">📤 Upload
+                            Code</a></li>
+                </ul>
+
+                <div class="navbar-actions" id="navbarActions">
+                    <!-- Will be populated by JavaScript based on auth state -->
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="content">
+            <!-- Pages will be dynamically loaded here -->
+        </main>
+
+        <!-- Footer -->
+        <footer
+            style="background-color: var(--color-surface); border-top: 1px solid var(--color-border); padding: 2rem 0; margin-top: auto;">
+            <div class="container text-center">
+                <p class="text-secondary mb-sm">© 2025 DevConnect. Built with ❤️ for developers.</p>
+                <p class="text-tertiary text-sm">AI-Powered Q&A • Community Driven • Open Source</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-backdrop" id="loginModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Welcome Back</h3>
+                <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <div id="loginError" class="alert alert-error hidden"></div>
+                    <div class="flex gap-md" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Login</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('loginModal')">Cancel</button>
+                    </div>
+                </form>
+                <p class="text-center text-sm text-secondary" style="margin-top: 1rem;">
+                    Don't have an account? <a href="#" onclick="switchToRegister()"
+                        style="color: var(--color-primary); font-weight: 500;">Register</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-backdrop" id="registerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Join DevConnect</h3>
+                <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="registerName">Full Name</label>
+                        <input type="text" id="registerName" class="form-input" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" class="form-input" placeholder="••••••••" required
+                            minlength="6">
+                        <span class="form-helper">Must be at least 6 characters</span>
+                    </div>
+                    <div id="registerError" class="alert alert-error hidden"></div>
+                    <div class="flex gap-md" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Register</button>
+                        <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('registerModal')">Cancel</button>
+                    </div>
+                </form>
+                <p class="text-center text-sm text-secondary" style="margin-top: 1rem;">
+                    Already have an account? <a href="#" onclick="switchToLogin()"
+                        style="color: var(--color-primary); font-weight: 500;">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+
+    <!-- App Components -->
+    <script src="components/modals.js"></script>
+    <script src="components/navbar.js"></script>
+    <script src="components/code-editor.js"></script>
+
+    <!-- App Pages -->
+    <script src="pages/home.js"></script>
+    <script src="pages/questions.js"></script>
+    <script src="pages/question-detail.js"></script>
+    <script src="pages/ask-question.js"></script>
+    <script src="pages/community.js"></script>
+    <script src="pages/upload-code.js"></script>
+    <script src="pages/profile.js"></script>
+
+    <!-- Main App -->
+    <script src="app.js"></script>
+</body>
+
+</html>
